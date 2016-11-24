@@ -1,0 +1,17 @@
+Hi,
+
+before doing this try to install ANSIBLE in master
+
+then python in client
+
+sync ssh-keylogin for particular user
+also add host in known host if possible
+
+* TO RUN
+
+tsung.yml 
+   1. change ip hostname with suitable ip and hostname
+   2. then copy certs or key if u have inside the certs directory
+   3. inventory.ini add ip or hostname
+   4. tsung.yml change the server=" hostname to attack "
+   
