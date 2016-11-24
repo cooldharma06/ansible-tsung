@@ -1,0 +1,56 @@
+---
+ - hosts: tsung
+   vars:
+    # created with 
+    # import crypt,getpass; print crypt.crypt(getpass.getpass(),crypt.mksalt((crypt.METHOD_SHA512)))
+    password : $6$v3/mo.h5CbbuybsE$1uhIVFu3vVOoPg/pkP5.ZJEWXC/sXts9FtLeNzju5HyofRJbQUPIFBZxvvuLYWOOhTg5fW/nzXqEbq4BX59bi/
+    
+   tasks: 
+    - name: ping test
+      ping: 
+       
+    - name: create stack user and give sudo permission
+      user: name=stack state=present groups="sudo" password={{password}} 
+      become: yes
+
+    - name: Allow 'stack' group to have passwordless sudo
+      become: yes
+      lineinfile:
+       dest: /etc/sudoers
+       state: present
+       regexp: '^%stack'
+       line: '%stack ALL=(ALL) NOPASSWD: ALL' 
+
+    - name: add staging-sse.cisco.com hostname in /etc/hosts       
+      become: yes
+      lineinfile:
+       dest: /etc/hosts
+       state: present
+       line: 'ip hostname'
+
+    - name: install tsung
+      become: yes
+     # become_user: stack
+      apt: name=tsung state=installed update_cache=yes     
+
+    - name: create Documents directory
+      become: yes
+      become_user: stack
+      file: path=/home/stack/Documents state=directory mode=775
+
+
+    - name: Copy the cert to /home/stack
+      become: yes
+      become_user: stack
+      copy: src=/home/ubuntu/Documents/tsung_ansible/certs dest=/home/stack mode=400
+
+    - name: get the copy of tsung configuration file
+      become: yes
+      become_user: stack
+      copy: src=/home/ubuntu/Documents/tsung_ansible/portal-info.xml dest=/home/stack/Documents/ owner=stack
+      
+    - name: run the tsung portal id(info) 
+      become: yes
+      become_user: stack
+      command: tsung -f /home/stack/Documents/portal-info.xml start
+      
